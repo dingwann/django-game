@@ -1,0 +1,4 @@
+class WcGame {
+    constructor(id) {
+    }
+}
