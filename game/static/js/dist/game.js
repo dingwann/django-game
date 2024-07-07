@@ -212,11 +212,12 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
             return false;
         });
         this.playground.game_map.$canvas.mousedown(function (e) {
+            const rect = outer.ctx.canvas.getBoundingClientRect();
             if (e.which === 3) {
-                outer.move_to(e.clientX, e.clientY);
+                outer.move_to(e.clientX - rect.left, e.clientY - rect.top);
             } else if (e.which === 1) {
                 if (outer.cur_skill === "fireball") {
-                    outer.shoot_fireball(e.clientX, e.clientY);
+                    outer.shoot_fireball(e.clientX - rect.left, e.clientY - rect.top);
                 }
 
                 outer.cur_skill = null;
@@ -286,8 +287,8 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
         this.spent_time += this.timedelta / 1000;
         if (!this.is_me && this.spent_time > 4 && Math.random() < 1 / 300.0) {
             let player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)]; // 随机攻击
-            let tx = player.x + player.vx * player.speed * this.timedelta / 1000 * 1;
-            let ty = player.y + player.vy * player.speed * this.timedelta / 1000 * 1;
+            let tx = player.x + this.vx * player.speed * this.timedelta / 1000 * 0.3;
+            let ty = player.y + this.vy * player.speed * this.timedelta / 1000 * 0.3;
             this.shoot_fireball(tx, ty);
         }
 
@@ -322,6 +323,14 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     };
+
+    on_destroy() {
+        for (let i = 0; i < this.playground.players.length; i++) {
+            if (this.playground.players[i] == this) {
+                this.playground.players.splice(i, 1)
+            }
+        }
+    }
 };class FireBall extends WcGameObject {
     constructor(playground, player, x, y, radius, vx, vy, color, speed, move_length, damage) {
         super();
@@ -400,19 +409,7 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
             </div>
         `);
 
-        this.root.$wc_game.append(this.$playground);
-        this.width = this.$playground.width();
-        this.height = this.$playground.height();
-        this.game_map = new GameMap(this);
-        this.players = [];
-        this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, "white", this.height * 0.15, true));
-
-        // 人机
-        for (let i = 0; i < 5; i++) {
-            this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, this.get_random_color(), this.height * 0.15, false));
-        }
-
-        // this.hide();
+        this.hide();
         this.start();
     }
 
@@ -427,6 +424,17 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
 
     show() {  // 打开playground界面
         this.$playground.show();
+        this.root.$wc_game.append(this.$playground);
+        this.width = this.$playground.width();
+        this.height = this.$playground.height();
+        this.game_map = new GameMap(this);
+        this.players = [];
+        this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, "white", this.height * 0.15, true));
+
+        // 人机
+        for (let i = 0; i < 5; i++) {
+            this.players.push(new Player(this, this.width / 2, this.height / 2, this.height * 0.05, this.get_random_color(), this.height * 0.15, false));
+        }
     };
 
     hide() {  // 关闭playground界面
@@ -436,7 +444,7 @@ requestAnimationFrame(WC_GAME_ANIMATION);class GameMap extends WcGameObject {
     constructor(id) {
         this.id = id;
         this.$wc_game = $(`#${id}`);
-        // this.menu = new WcGameMenu(this);
+        this.menu = new WcGameMenu(this);
         this.playground = new WcGamePlayground(this);
 
         this.start();
