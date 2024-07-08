@@ -13,11 +13,12 @@ class WcGameMenu {
                     </div>
                     <br/>
                     <div class="wc-game-menu-field-item wc-game-menu-field-item-settings">
-                        设置
+                        退出
                     </div>
                 </div>
             </div>
         `);
+        this.$menu.hide();
         this.root.$wc_game.append(this.$menu);
         this.$single = this.$menu.find(".wc-game-menu-field-item-single");
         this.$multi = this.$menu.find(".wc-game-menu-field-item-multi");
@@ -48,7 +49,7 @@ class WcGameMenu {
             console.log("click multi");
         })
         this.$settings.click(function () {
-            console.log("click settings");
+            outer.root.settings.logout_on_remote();
         })
     };
 

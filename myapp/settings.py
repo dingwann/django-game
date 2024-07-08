@@ -51,6 +51,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True  # 允许所有跨域请求
+
 ROOT_URLCONF = 'myapp.urls'
 
 TEMPLATES = [
