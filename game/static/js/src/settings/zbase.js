@@ -102,6 +102,8 @@ class Settings {
         this.$register_submit = this.$register.find(".wc-game-settings-submit button");
         this.$register_error_message = this.$register.find(".wc-game-settings-error-message");
 
+        this.$otherapplogin = this.$settings.find(".wc-game-settings-other img");
+
         this.$settings.find(".register").on("click", () => {
             this.register();
         })
@@ -120,8 +122,25 @@ class Settings {
     }
 
     add_listening_events() {
+        let outer = this;
         this.add_listening_events_login();
         this.add_listening_events_register();
+
+        this.$otherapplogin.on("click", () => {
+            outer.otherapplogin();
+        })
+    }
+
+    otherapplogin() {
+        $.ajax({
+            url: "http://dingwan.top:8000/settings/otherapp/apply_code/",
+            type: "GET",
+            success: function (resp) {
+                if (resp.result === "Success") {
+                    window.location.replace(resp.apply_code_url);
+                }
+            }
+        })
     }
 
     add_listening_events_login() {

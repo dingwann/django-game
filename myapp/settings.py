@@ -53,6 +53,17 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True  # 允许所有跨域请求
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+}
+USER_AGENTS_CACHE = 'default'
+
 ROOT_URLCONF = 'myapp.urls'
 
 TEMPLATES = [
