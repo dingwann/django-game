@@ -66,8 +66,7 @@ class Player extends WcGameObject {
         });
         this.playground.game_map.$canvas.mousedown(function (e) {
             if (outer.playground.state !== "fighting")
-                return false;
-
+                return true;
 
             const rect = outer.ctx.canvas.getBoundingClientRect();
             if (e.which === 3) {
@@ -103,7 +102,20 @@ class Player extends WcGameObject {
             }
         });
 
-        $(window).keydown(function (e) {
+        this.playground.game_map.$canvas.keydown(function (e) {
+            if (e.which === 13) { // 回车键
+                if (outer.playground.mode === "multi mode") {   // 打开聊天框
+                    outer.playground.chat_field.show_input();
+                    return false;
+                }
+            } else if (e.which === 27) {   //esc
+                if (outer.playground.mode === "multi mode") {
+                    outer.playground.chat_field.hide_input();
+                    return false;
+                }
+            }
+
+
             if (outer.playground.state !== "fighting")
                 return true;
 
