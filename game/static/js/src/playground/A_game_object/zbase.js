@@ -7,6 +7,17 @@ class WcGameObject {
         WC_GAME_OBJECTS.push(this);
         this.has_called_start = false;  // 标记是否调用过start()
         this.timedelta = 0; // 记录每两帧的时间间隔 ms
+
+        this.uuid = this.crate_uuid();
+    }
+
+    crate_uuid() {
+        let res = "";
+        for (let i = 0; i < 8; i++) {
+            let x = parseInt(Math.floor(Math.random() * 10));
+            res += x;
+        }
+        return res;
     }
 
     start() {
