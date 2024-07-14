@@ -28,6 +28,10 @@ class WcGameObject {
         // 每个对象每帧调用
     }
 
+    late_update() {
+        // 每个对象最后帧调用
+    }
+
     on_destroy() {
         // 每个对象销毁前调用一次
 
@@ -59,6 +63,11 @@ let WC_GAME_ANIMATION = function (timestamp) {
             obj.update();
         }
     }
+
+    for (let i = 0; i < WC_GAME_OBJECTS.length; i++) {
+        WC_GAME_OBJECTS[i].late_update();
+    }
+
     last_timestamp = timestamp;
     requestAnimationFrame(WC_GAME_ANIMATION);
 }

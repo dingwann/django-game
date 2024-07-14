@@ -12,6 +12,10 @@ class WcGameMenu {
                         多人模式
                     </div>
                     <br/>
+                    <div class="wc-game-menu-field-item wc-game-menu-field-item-desc">
+                        游戏说明
+                    </div>
+                    <br/>
                     <div class="wc-game-menu-field-item wc-game-menu-field-item-settings">
                         退出
                     </div>
@@ -23,6 +27,7 @@ class WcGameMenu {
         this.$single = this.$menu.find(".wc-game-menu-field-item-single");
         this.$multi = this.$menu.find(".wc-game-menu-field-item-multi");
         this.$settings = this.$menu.find(".wc-game-menu-field-item-settings");
+        this.$desc = this.$menu.find(".wc-game-menu-field-item-desc");
 
         this.start();
     };
@@ -48,6 +53,10 @@ class WcGameMenu {
         this.$multi.click(function () {
             outer.hide();
             outer.root.playground.show("multi mode");
+        })
+        this.$desc.click(function () {
+            outer.hide();
+            outer.root.desc.show();
         })
         this.$settings.click(function () {
             outer.root.settings.logout_on_remote();

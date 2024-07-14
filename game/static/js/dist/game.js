@@ -1,4 +1,60 @@
-class WcGameMenu {
+class WcGameDesc {
+    constructor(root) {
+        this.root = root;
+        this.$desc = $(`
+            <div class="wc-game-desc">
+                <div class="wc-game-desc-title">
+                    <h1>游戏规则</h1>
+                </div>
+                <div class="wc-game-desc-content">
+                    <pre>
+                        鼠标右键移动
+
+                        按Q之后按鼠标左键释放火球
+
+                        按F之后按鼠标左键闪现一段距离
+
+                        多人模式：
+                        按照积分匹配，随时间推移匹配积分差距逐渐扩大至匹配到对手为止
+
+                        三人匹配为一局
+
+                        回车打开聊天，ESC退出聊天
+                    </pre>
+                </div>
+                <div class="desc-home">
+                    <span>
+                        返回主页
+                    </span>
+                </div>
+            </div>
+        `);
+
+        this.root.$wc_game.append(this.$desc);
+
+        this.start();
+    }
+
+    start() {
+        this.hide();
+        this.addlistening_event();
+    }
+
+    addlistening_event() {
+        this.$desc.find(".desc-home").on("click", () => {
+            this.hide();
+            this.root.menu.show();
+        });
+    }
+
+    show() {
+        this.$desc.show();
+    }
+
+    hide() {
+        this.$desc.hide();
+    }
+}class WcGameMenu {
     constructor(root) {
         this.root = root;
         this.$menu = $(`
@@ -12,6 +68,10 @@ class WcGameMenu {
                         多人模式
                     </div>
                     <br/>
+                    <div class="wc-game-menu-field-item wc-game-menu-field-item-desc">
+                        游戏说明
+                    </div>
+                    <br/>
                     <div class="wc-game-menu-field-item wc-game-menu-field-item-settings">
                         退出
                     </div>
@@ -23,6 +83,7 @@ class WcGameMenu {
         this.$single = this.$menu.find(".wc-game-menu-field-item-single");
         this.$multi = this.$menu.find(".wc-game-menu-field-item-multi");
         this.$settings = this.$menu.find(".wc-game-menu-field-item-settings");
+        this.$desc = this.$menu.find(".wc-game-menu-field-item-desc");
 
         this.start();
     };
@@ -48,6 +109,10 @@ class WcGameMenu {
         this.$multi.click(function () {
             outer.hide();
             outer.root.playground.show("multi mode");
+        })
+        this.$desc.click(function () {
+            outer.hide();
+            outer.root.desc.show();
         })
         this.$settings.click(function () {
             outer.root.settings.logout_on_remote();
@@ -86,6 +151,10 @@ class WcGameObject {
         // 每个对象每帧调用
     }
 
+    late_update() {
+        // 每个对象最后帧调用
+    }
+
     on_destroy() {
         // 每个对象销毁前调用一次
 
@@ -117,6 +186,11 @@ let WC_GAME_ANIMATION = function (timestamp) {
             obj.update();
         }
     }
+
+    for (let i = 0; i < WC_GAME_OBJECTS.length; i++) {
+        WC_GAME_OBJECTS[i].late_update();
+    }
+
     last_timestamp = timestamp;
     requestAnimationFrame(WC_GAME_ANIMATION);
 }
@@ -524,6 +598,7 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
 
     update() {
         this.spent_time += this.timedelta / 1000;
+        this.update_win();
         if (this.character === "me" && this.playground.state === "fighting") {
             this.update_coldtime();
         }
@@ -532,6 +607,13 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
 
         this.render();
     };
+
+    update_win() {
+        if (this.playground.state === "fighting" && this.character === "me" && this.playground.players.length === 1) {
+            this.playground.state = "over";
+            this.playground.score_board.win()
+        }
+    }
 
     update_coldtime() {
         this.fireball_coldtime -= this.timedelta / 1000;
@@ -639,13 +721,86 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
 
 
     on_destroy() {
-        if (this.character === "me")
-            this.playground.state = "over";
+        if (this.character === "me") {
+            if (this.playground.state === "fighting") {
+                this.playground.state = "over";
+                this.playground.score_board.lose();
+            }
+        }
+
         for (let i = 0; i < this.playground.players.length; i++) {
             if (this.playground.players[i] == this) {
                 this.playground.players.splice(i, 1)
                 break;
             }
+        }
+    }
+};class ScoreBoard extends WcGameObject {
+    constructor(playground) {
+        super();
+        this.playground = playground;
+        this.ctx = this.playground.game_map.ctx;
+
+
+        this.state = null;  // win or lose
+
+        this.win_img = new Image();
+        this.win_img.src = "https://cdn.acwing.com/media/article/image/2021/12/17/1_8f58341a5e-win.png";
+
+        this.lose_img = new Image();
+        this.lose_img.src = "https://cdn.acwing.com/media/article/image/2021/12/17/1_9254b5f95e-lose.png";
+
+
+    };
+
+    start() {
+
+    }
+
+    add_listening_events() {
+        let outer = this;
+
+        let $canvas = this.playground.game_map.$canvas;
+
+        $canvas.on("click", () => {
+            outer.playground.hide();
+            outer.playground.root.menu.show();
+        })
+
+    }
+
+    win() {
+        let outer = this;
+        this.state = "win";
+
+        let timeoutid = setTimeout(() => {
+            outer.add_listening_events();
+
+            clearTimeout(timeoutid)
+        }, 1000)
+    }
+
+    lose() {
+        let outer = this;
+        this.state = "lose";
+
+        let timeoutid = setTimeout(() => {
+            outer.add_listening_events();
+
+            clearTimeout(timeoutid)
+        }, 1000)
+    }
+
+    late_update() {
+        this.render();
+    }
+
+    render() {
+        let len = this.playground.height / 2;
+        if (this.state === "win") {
+            this.ctx.drawImage(this.win_img, this.playground.width / 2 - len / 2, this.playground.height / 2 - len / 2, len, len);
+        } else if (this.state === "lose") {
+            this.ctx.drawImage(this.lose_img, this.playground.width / 2 - len / 2, this.playground.height / 2 - len / 2, len, len)
         }
     }
 };class FireBall extends WcGameObject {
@@ -952,6 +1107,7 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
         this.mode = mode;
         this.state = "watting";   // "watting --> fighting --> over"
         this.notice_board = new NoticeBoard(this);
+        this.score_board = new ScoreBoard(this);
         this.player_count = 0;
 
         this.resize();
@@ -977,6 +1133,27 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
     };
 
     hide() {  // 关闭playground界面
+        while (this.players && this.players.length > 0) {
+            this.players[0].destroy();
+        }
+
+        if (this.game_map) {
+            this.game_map.destroy();
+            this.game_map = null;
+        }
+
+        if (this.notice_board) {
+            this.notice_board.destroy();
+            this.notice_board = null;
+        }
+
+        if (this.score_board) {
+            this.score_board.destroy();
+            this.score_board = null;
+        }
+
+        this.$playground.empty();
+
         this.$playground.hide();
     };
 };class Settings {
@@ -1254,6 +1431,7 @@ requestAnimationFrame(WC_GAME_ANIMATION);class ChatField {
         this.settings = new Settings(this);
         this.menu = new WcGameMenu(this);
         this.playground = new WcGamePlayground(this);
+        this.desc = new WcGameDesc(this);
         this.start();
     };
 

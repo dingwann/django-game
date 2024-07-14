@@ -6,6 +6,7 @@ export class WcGame {
         this.settings = new Settings(this);
         this.menu = new WcGameMenu(this);
         this.playground = new WcGamePlayground(this);
+        this.desc = new WcGameDesc(this);
         this.start();
     };
 
